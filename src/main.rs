@@ -43,6 +43,7 @@ enum Commands{
     ListAll,
     UpdateText(u32, String),
     Complete(u32),
+    Error(String),
     Exit
 }
 
@@ -50,7 +51,7 @@ enum Commands{
 fn help() {
     println!("Commands:\n 
         help | Lists the available options\n
-        add [-text] | adds a new to do element with your description\n
+        add [-text] | adds a new ToDo element with your description\n
         list | Lists all the ToDo elements\n
         update [-index] [-text] | Updates the element at index with the new text\n
         complete [-index] | Marks the element at index as completed
@@ -73,25 +74,45 @@ fn main() {
 
         let split_input : Vec<&str> = input.split(|c| c=='\n' || c=='-').collect();
 
-        if split_input.len() == 0 {
+        if split_input.is_empty() {
             continue;
-            println!("Shouldn't reach this", )
         }
+        
         let command = match split_input[0].trim() {
             "list" => Commands::ListAll,
             "add" => {
-                let cmd = Commands::Add(TodoElement::new(list.index, split_input[1].to_string(), false));
-                list.index = list.index + 1;
-                cmd
+                if !split_input[1].trim().is_empty() {
+                    let cmd = Commands::Add(TodoElement::new(list.index, split_input[1].to_string(), false));
+                    list.index += 1;
+                    cmd
+                }
+                else {
+                    Commands::Error("[add] requires a non-empty text parameter [-text]".to_string())
+                }
             },
             "update" => {
-                Commands::UpdateText(split_input[1].parse::<u32>().unwrap(), split_input[2].to_string())
+                match split_input[1].trim().parse::<u32>() {
+                    Ok(int) => Commands::UpdateText(int, split_input[2].to_string()),
+                    Err(_e) => {
+                    Commands::Error("The first paramter should be a positive Integer, \
+                        ex. [update [-123] [-some text]]".to_string())
+                    }
+                }
             },
             "complete" => {
-                Commands::Complete(split_input[1].parse::<u32>().unwrap())
+
+                match split_input[1].trim().parse::<u32>() {
+                    Ok(int) => Commands::Complete(int),
+                    Err(_e) => {
+                    Commands::Error("The first paramter should be a positive Integer, \
+                        ex. [complete [-123]]".to_string())
+                    }
+                }
             }
             "exit" => Commands::Exit,
-            _ => Commands::Help
+            "help" => Commands::Help,
+            _ => Commands::Error("Input not recognized as a command. \
+                Commands are case sensitive. Use command [help] for available commands.".to_string())
         };
 
         match command {
@@ -100,6 +121,7 @@ fn main() {
             Commands::Help => help(),
             Commands::UpdateText(id, text) => list.update_text(id, text),
             Commands::Complete(id) => list.entries[id as usize].done = true,
+            Commands::Error(e) => println!("{}", e),
             Commands::Exit => process::exit(0)
         }
         
