@@ -46,6 +46,17 @@ enum Commands{
     Exit
 }
 
+
+fn help() {
+    println!("Commands:\n 
+        help | Lists the available options\n
+        add [-text] | adds a new to do element with your description\n
+        list | Lists all the ToDo elements\n
+        update [-index] [-text] | Updates the element at index with the new text\n
+        complete [-index] | Marks the element at index as completed
+        exit - Close the program", );
+}
+
 fn main() {
     let mut list = TodoList {
         entries : Vec::<TodoElement>::new(),
@@ -55,17 +66,18 @@ fn main() {
     println!("Super Simple To-Do-List CLI 0.1.0");
 
     loop{
-        print!(">>");
+        print!(">> ");
         io::stdout().flush().unwrap();
         let mut input = String::new();
         io::stdin().read_line(&mut input).expect("Unable to read line");
 
-        let split_input : Vec<&str> = input.split_whitespace().collect();
+        let split_input : Vec<&str> = input.split(|c| c=='\n' || c=='-').collect();
 
         if split_input.len() == 0 {
             continue;
+            println!("Shouldn't reach this", )
         }
-        let command = match split_input[0] {
+        let command = match split_input[0].trim() {
             "list" => Commands::ListAll,
             "add" => {
                 let cmd = Commands::Add(TodoElement::new(list.index, split_input[1].to_string(), false));
@@ -85,7 +97,7 @@ fn main() {
         match command {
             Commands::ListAll => list.list_all(),
             Commands::Add(task) => list.add(task),
-            Commands::Help => println!("Nope"),
+            Commands::Help => help(),
             Commands::UpdateText(id, text) => list.update_text(id, text),
             Commands::Complete(id) => list.entries[id as usize].done = true,
             Commands::Exit => process::exit(0)
