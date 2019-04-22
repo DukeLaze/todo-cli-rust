@@ -1,4 +1,5 @@
 use std::{io, io::Write, process};
+use serde::{Serialize, Deserialize};
 
 pub struct TodoElement{
     pub id : u32,
@@ -28,7 +29,8 @@ impl TodoList {
 
     fn list_all(&self) {
         for element in &self.entries {
-            println!("Id: {} - Status: {}\nTask: {}", element.id, if element.done {"[Completed]"} else {"[Uncompleted]"}, element.text);
+            println!("Id: {} - Status: {}\nTask: {}", element.id, 
+                if element.done {"[Completed]"} else {"[Uncompleted]"}, element.text);
         }
     }
 
@@ -77,7 +79,7 @@ fn main() {
         if split_input.is_empty() {
             continue;
         }
-        
+
         let command = match split_input[0].trim() {
             "list" => Commands::ListAll,
             "add" => {

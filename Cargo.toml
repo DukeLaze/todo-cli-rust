@@ -5,3 +5,4 @@ authors = ["Lasse Seivaag <lasse_0407@hotmail.com>"]
 edition = "2018"
 
 [dependencies]
+serde = "1.0.90"
