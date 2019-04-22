@@ -1,0 +1,17 @@
+stages:
+  - version-check
+  - build
+  - test
+  
+version-check:
+  script:
+  - rustc --version && cargo --version      # Print version info for debugging
+
+# Use cargo to build the project
+build:cargo:
+  script:
+  - cargo build --verbose
+# Use cargo to test the project
+test:cargo:
+  script:
+  - cargo test --all --verbose
